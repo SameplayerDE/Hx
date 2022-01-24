@@ -1,0 +1,22 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Hx2D", "Hx2D\Hx2D.csproj", "{54829FA6-03FB-42A3-9E5F-FD5E33275C59}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Test", "Test\Test.csproj", "{67773DA5-D349-4AD2-ADA3-3D8BEF45CE2E}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{54829FA6-03FB-42A3-9E5F-FD5E33275C59}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{54829FA6-03FB-42A3-9E5F-FD5E33275C59}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{54829FA6-03FB-42A3-9E5F-FD5E33275C59}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{54829FA6-03FB-42A3-9E5F-FD5E33275C59}.Release|Any CPU.Build.0 = Release|Any CPU
+		{67773DA5-D349-4AD2-ADA3-3D8BEF45CE2E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{67773DA5-D349-4AD2-ADA3-3D8BEF45CE2E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{67773DA5-D349-4AD2-ADA3-3D8BEF45CE2E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{67773DA5-D349-4AD2-ADA3-3D8BEF45CE2E}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
