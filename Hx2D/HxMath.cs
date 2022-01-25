@@ -183,35 +183,46 @@ namespace Hx
         {
             return Y(m, 0, xa, ya);
         }
-        
-        public static float T(HxLine line)
+
+        public static float T(HxLine a)
         {
-            return Y(M(line), 0, line.A);
+            return Y(M(a), 0, a.A);
         }
-        
+
+        public static float T(HxRay a)
+        {
+            return Y(M(a), 0, a.Position);
+        }
+
         public static float Y(float m, float x, float t)
         {
             return m * x + t;
         }
-        
+
         public static float Y(float m, float x, float xa, float ya)
         {
             return m * (x - xa) + ya;
         }
-        
+
         public static float Y(float m, float x, Vector2 a)
         {
             var (xa, ya) = a;
             return Y(m, x, xa, ya);
         }
-        
+
         public static float M(HxLine a)
         {
             var (xa, ya) = a.A;
             var (xb, yb) = a.B;
             return M(xa, ya, xb, yb);
         }
-        
+
+        public static float M(HxRay a)
+        {
+            var (xb, yb) = DirectionNormalised(Vector2.Zero, a.Direction);
+            return M(0, 0, xb, yb);
+        }
+
         public static float M(float xa, float ya, float xb, float yb)
         {
             var result = (yb - ya) / (xb - xa);
@@ -220,12 +231,26 @@ namespace Hx
 
         public static bool Contains(HxRectangle a, Vector2 b)
         {
+            var min = a.Position;
+            var max= a.Position + a.Size;
+
+            if (b.X > min.X && b.Y > min.Y)
+            {
+                if (b.X < max.X && b.Y < max.Y)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+            
             var bDir = Direction(b, a.Position);
             if (bDir.X > 0 || bDir.Y > 0) return false;
-            var rDir = Direction(a.Position, a.Position + a.Size);
-            return bDir.Length() <= rDir.Length();
+            var rDir = Direction(b, a.Position + a.Size);
+            if (rDir.X < 0 || rDir.Y < 0) return false;
+            return true;
         }
-        
+
         public static (bool, Vector2) Intersects(HxLine a, HxLine b)
         {
             var resultM = M(a) + M(b) * -1;
@@ -238,6 +263,47 @@ namespace Hx
             var containsB = Contains(b.GetBounds(), new Vector2(resultX, resultY));
             var result = containsA && containsB;
             return (result, new Vector2(resultX, resultY));
+        }
+
+        public static (bool, Vector2) Intersects(HxRay a, HxRay b)
+        {
+            var resultM = M(a) + M(b) * -1;
+            if (resultM == 0) return (false, Vector2.Zero);
+            var resultT = T(a) * -1 + T(b);
+            if (resultT == 0) return (false, Vector2.Zero);
+            var resultX = resultT / resultM;
+            var resultY = Y(M(a), resultX, T(a));
+            var intersectionResult = new Vector2(resultX, resultY);
+            var checkA = Vector2.Dot(
+                DirectionNormalised(Vector2.Zero, a.Direction),
+                DirectionNormalised(intersectionResult, a.Position)
+            );
+            var checkB = Vector2.Dot(
+                DirectionNormalised(Vector2.Zero, b.Direction),
+                DirectionNormalised(intersectionResult, b.Position)
+            );
+            var resultA = Math.Abs(checkA - (-1f)) < 0.0001f;
+            var resultB = Math.Abs(checkB - (-1f)) < 0.0001f;
+            return (resultA && resultB, intersectionResult);
+        }
+
+        public static (bool, Vector2) Intersects(HxRay a, HxLine b)
+        {
+            var resultM = M(a) + M(b) * -1;
+            if (resultM == 0) return (false, Vector2.Zero);
+            var resultT = T(a) * -1 + T(b);
+            if (resultT == 0) return (false, Vector2.Zero);
+            var resultX = resultT / resultM;
+            var resultY = Y(M(a), resultX, T(a));
+            var intersectionResult = new Vector2(resultX, resultY);
+            var checkA = Vector2.Dot(
+                DirectionNormalised(Vector2.Zero, a.Direction),
+                DirectionNormalised(intersectionResult, a.Position)
+            );
+            var containsB = Contains(b.GetBounds(), new Vector2(resultX, resultY));
+            var resultA = Math.Abs(checkA - (-1f)) < 0.0001f;
+            var resultB = containsB;
+            return (resultA && resultB, intersectionResult);
         }
     }
 }

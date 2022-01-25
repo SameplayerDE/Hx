@@ -1,6 +1,9 @@
+using System;
+using System.Windows.Forms.VisualStyles;
 using Hx;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework.Input;
 using PrimitiveExpander;
 
 namespace Test
@@ -10,14 +13,19 @@ namespace Test
         private GraphicsDeviceManager _graphics;
         private SpriteBatch _spriteBatch;
 
-        private Vector2 _position;
+        private HxCircle _mouse;
+        
+        private HxLine _a;
+        private HxLine _b;
 
+        private HxRay _ra;
+        private HxRay _rb;
 
-        private HxCircle _a;
-        private HxCircle _b;
+        private HxRectangle _rect;
 
         public Game1()
         {
+            Content.RootDirectory = "Content";
             _graphics = new GraphicsDeviceManager(this);
         }
 
@@ -25,55 +33,105 @@ namespace Test
         {
             PrimitiveRenderer.Initialise(GraphicsDevice);
 
-            _a = new HxCircle();
-            _a.Radius = 25f;
+            const float scale = 10f;
+
+            _rect = new HxRectangle();
+            _rect.Position = new Vector2(0, 0);
+            _rect.Size = new Vector2(100, 100);
+
+            _a = new HxLine();
+            _a.A = new Vector2(0, 0) * scale;
+            _a.B = new Vector2(2, 4) * scale;
+
+            _b = new HxLine();
+            _b.A = new Vector2(-2, 6) * scale;
+            _b.B = new Vector2(3, 2) * scale;
+
+            _ra = new HxRay();
+            _ra.Position = new Vector2(0, 0);
+            _ra.Direction = new Vector2(10, 0);
             
-            _b = new HxCircle();
-            _b.Radius = 5f;
-            
+            _rb = new HxRay();
+            _rb.Position = new Vector2(-10, -10);
+            _rb.Direction = new Vector2(10, 0);
+
             base.Initialize();
         }
 
         protected override void LoadContent()
         {
             _spriteBatch = new SpriteBatch(GraphicsDevice);
+            
             base.LoadContent();
         }
 
         protected override void Update(GameTime gameTime)
         {
+            HxTime.Update(gameTime);
             HxMouse.Update(gameTime);
+
+            var (width, height) = GraphicsDevice.Viewport.Bounds.Size.ToVector2();
+            
+            var keyboardState = Keyboard.GetState();
+            var mouseState = Mouse.GetState();
+            
+            if (keyboardState.IsKeyDown(Keys.PageUp))
+            {
+                PrimitiveRenderer.Scale += 1 * HxTime.DeltaTimeF;
+            }
+
+            if (keyboardState.IsKeyDown(Keys.PageDown))
+            {
+                PrimitiveRenderer.Scale -= 1 * HxTime.DeltaTimeF;
+            }
+            
             PrimitiveRenderer.UpdateDefaultCamera();
 
-            var (width, height) = _graphics.GraphicsDevice.Viewport.Bounds.Size.ToVector2();
-
-            _a.Position = HxMouse.Position.ToVector2();
-            _a.Position -= new Vector2(width, height) / 2;
-
+            _rb.Position = HxMouse.Position.ToVector2() - new Vector2(width, height) / 2;
+            
             base.Update(gameTime);
         }
 
         protected override void Draw(GameTime gameTime)
         {
             GraphicsDevice.Clear(Color.White);
-
-
-            PrimitiveRenderer.DrawCircleF(
+            GraphicsDevice.SamplerStates[0] = SamplerState.PointClamp;
+            GraphicsDevice.BlendState = BlendState.AlphaBlend;
+            
+            PrimitiveRenderer.DrawQuadF(
                 null,
-                HxCircle.Intersects(_a, _b) ? Color.Red : Color.Black,
-                _a.Position,
-                _a.Radius,
-                10
+                Color.Black,
+                _rect.Position, _rect.Size
             );
             
             PrimitiveRenderer.DrawCircleF(
                 null,
-                HxCircle.Intersects(_b, _a) ? Color.Red : Color.Black,
-                _b.Position,
-                _b.Radius,
-                10
+                HxMath.Contains(_rect, _mouse.Center) ? Color.Green : Color.Blue,
+                _mouse.Center, 10f
+            );
+            
+            PrimitiveRenderer.DrawLine(
+                null,
+                Color.Green,
+                _a.A, _a.B
+            );
+            
+            PrimitiveRenderer.DrawLine(
+                null,
+                Color.Green,
+                _rb.Position, _rb.Direction * 10f + _rb.Position
             );
 
+            var (intersects, position) = HxMath.Intersects(_rb, _a);
+            if (intersects)
+            {
+                PrimitiveRenderer.DrawCircleF(
+                    null,
+                    Color.Red,
+                    position, 2f
+                );
+            }
+            
             base.Draw(gameTime);
         }
     }
